@@ -67,62 +67,73 @@
 #
 
 # @lc code=start
+
 class DoubleLinkedNode:
-    def __init__(self, key=0, value=0) -> None:
+    def __init__(self, key=-1, value=-1):
         self.key = key
         self.value = value
-        self.pre = None
+        self.prev = None
         self.next = None
+
+class DoubleLinedList:
+    def __init__(self):
+        self.head = DoubleLinkedNode()
+        self.tail = DoubleLinkedNode()
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    def del_node(self, node):
+        p, n = node.prev, node.next
+        p.next = n
+        n.prev = p
+
+    def add_to_end(self, node):
+        p = self.tail.prev
+        p.next = node
+        node.prev = p
+        node.next = self.tail
+        self.tail.prev = node
+
+    def pop_from_head(self):
+        if self.head.next == self.tail:
+            return None
+        node = self.head.next
+        self.del_node(node)
+        return node
+
+    def move_to_end(self, node):
+        self.del_node(node)
+        self.add_to_end(node)
 
 class LRUCache:
 
     def __init__(self, capacity: int):
-       self.cache = {}
-       self.capacity = capacity
-       self.head = DoubleLinkedNode()
-       self.tail = DoubleLinkedNode()
-       self.head.next = self.tail
-       self.tail.pre = self.head
+        self.cap = capacity
+        self.DLL = DoubleLinedList()
+        self.key2node = {}
 
-    def _add_node(self, node):
-        node.next = self.head.next
-        self.head.next.prev = node
-        node.pre = self.head
-        self.head.next = node
-
-    def _remove_node(self, node):
-        prev = node.prev
-        prev.next = node.next
-        node.next.prev = prev
-
-    def _move_to_head(self, node):
-        self._remove_node(node)
-        self._add_node(node)
-
-    def _pop_tail(self):
-        node = self.tail.prev
-        self._remove_node(node)
-        return node
 
     def get(self, key: int) -> int:
-        node = self.cache.get(key, None)
-        if not node:
-            return -1
-        self._move_to_head(node)
-        return node.value
+        if key in self.key2node:
+            node = self.key2node[key]
+            self.DLL.move_to_end(node)
+            return node.value
+        return -1
 
     def put(self, key: int, value: int) -> None:
-        node = self.cache.get(key, None)
-        if not node:
-            new_node = DoubleLinkedNode(key, value)
-            self.cache[key] = new_node
-            self._add_node(new_node)
-            if len(self.cache) > self.capacity:
-                tail = self._pop_tail()
-                del self.cache[tail.key]
-        else:
+        if key in self.key2node:
+            node = self.key2node[key]
             node.value = value
-            self._move_to_head(node)
+            self.DLL.move_to_end(node)
+        else:
+            if len(self.key2node) == self.cap:
+                node = self.DLL.pop_from_head()
+                if node:
+                    del self.key2node[node.key]
+            nnode = DoubleLinkedNode(key, value)
+            self.DLL.add_to_end(nnode)
+            self.key2node[key] = nnode
+
 
 
 # Your LRUCache object will be instantiated and called as such:
