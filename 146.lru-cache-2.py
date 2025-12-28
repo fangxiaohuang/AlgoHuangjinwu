@@ -68,42 +68,7 @@
 
 # @lc code=start
 
-class DoubleLinkedNode:
-    def __init__(self, key=-1, value=-1):
-        self.key = key
-        self.value = value
-        self.prev = None
-        self.next = None
-
-class DoubleLinedList:
-    def __init__(self):
-        self.head = DoubleLinkedNode()
-        self.tail = DoubleLinkedNode()
-        self.head.next = self.tail
-        self.tail.prev = self.head
-
-    def del_node(self, node):
-        p, n = node.prev, node.next
-        p.next = n
-        n.prev = p
-
-    def add_to_end(self, node):
-        p = self.tail.prev
-        p.next = node
-        node.prev = p
-        node.next = self.tail
-        self.tail.prev = node
-
-    def pop_from_head(self):
-        if self.head.next == self.tail:
-            return None
-        node = self.head.next
-        self.del_node(node)
-        return node
-
-    def move_to_end(self, node):
-        self.del_node(node)
-        self.add_to_end(node)
+from collections import OrderedDict
 
 class LRUCache:
 
